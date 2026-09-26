@@ -1,0 +1,1 @@
+const m=require("mongoose");module.exports=m.model("Product",new m.Schema({name:{type:String,required:true},description:String,price:{type:Number,required:true,min:0},category:String,image:String,stock:{type:Number,default:0,min:0},featured:{type:Boolean,default:false}},{timestamps:true}));

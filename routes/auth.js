@@ -1,0 +1,5 @@
+const r=require("express").Router(),bcrypt=require("bcryptjs"),jwt=require("jsonwebtoken"),User=require("../models/User"),{protect}=require("../middleware/auth");
+const pack=u=>({token:jwt.sign({id:u._id},process.env.JWT_SECRET,{expiresIn:"7d"}),user:{id:u._id,name:u.name,email:u.email,role:u.role}});
+r.post("/register",async(q,s)=>{try{let {name,email,password}=q.body;if(!name||!email||!password||password.length<6)return s.status(400).json({message:"Enter all fields; password needs 6+ characters"});if(await User.findOne({email}))return s.status(409).json({message:"Email already registered"});s.status(201).json(pack(await User.create({name,email,password:await bcrypt.hash(password,12)})))}catch(e){s.status(500).json({message:"Registration failed"})}});
+r.post("/login",async(q,s)=>{const u=await User.findOne({email:q.body.email});if(!u||!await bcrypt.compare(q.body.password||"",u.password))return s.status(401).json({message:"Incorrect email or password"});s.json(pack(u))});
+r.get("/me",protect,(q,s)=>s.json({user:q.user}));module.exports=r;
